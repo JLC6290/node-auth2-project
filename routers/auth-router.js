@@ -4,6 +4,7 @@ const router = express.Router();
 const User = require('../models/user-model');
 const jwt = require('jsonwebtoken');
 const secrets = require('../config/secrets');
+const verifyUser = require('../middleware/verify-user');
 
 const {isValid} = require('../models/user-services');
 
@@ -60,7 +61,6 @@ function generateToken(user) {
     const payload = {
         subject: user.id,
         username: user.username,
-
     }
     const options = {
         expiresIn: '1h'
@@ -68,7 +68,7 @@ function generateToken(user) {
     return jwt.sign(payload, secrets.jwtSecret, options)
 }
 
-router.get('/users', (req, res) => {
+router.get('/users', verifyUser, (req, res) => {
     if(req.session && req.session.loggedIn){
         User.find()
             .then(users => {
